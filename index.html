@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amazon Listing Optimization Tool | Stack Influence</title>
+<meta name="robots" content="noindex">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+:root{
+  --grape:#8551f5;--deep:#642eff;--lilac:#c3a4ff;--wash:#f0ecfb;
+  --rose:#ffabb9;--pink:#fbe1e6;--pinkdeep:#dd5290;
+  --ink:#141a21;--grey:#667085;--line:#e6e2ee;--paper:#ffffff;--bg:#f9f8f4;
+  --ok:#12855f;--okbg:#e7f5ef;--warn:#9a5b00;--warnbg:#fdf3e1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent}
+body{font-family:'Inter Tight',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:4px 2px 8px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end}
+.field{margin-top:18px}
+.row .field{margin-top:0}
+.lab{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}
+.lab label,.lab .lt{font-weight:600;font-size:14px}
+.opt{font-weight:400;color:var(--grey);font-size:13px}
+.count{font-size:12.5px;color:var(--grey);font-variant-numeric:tabular-nums;white-space:nowrap}
+.count.over{color:var(--pinkdeep);font-weight:600}
+.hint{font-size:13px;color:var(--grey);margin:6px 0 0}
+input[type=text],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px;outline:none;transition:background .15s,border-color .15s,box-shadow .15s;resize:vertical}
+textarea{min-height:46px;line-height:1.45}
+input[type=text]:focus,textarea:focus{background:var(--paper);border-color:var(--grape);box-shadow:0 0 0 3px var(--wash)}
+.toggle{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;min-height:46px}
+.toggle input{accent-color:var(--grape);width:17px;height:17px;margin:2px 0 0;flex:none}
+.toggle span{font-size:14px;line-height:1.35}
+.toggle small{display:block;color:var(--grey);font-size:12.5px}
+.bullets{display:grid;gap:8px}
+.bl{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}
+.bl .n{font-size:13px;color:var(--grey);padding-top:12px;text-align:right;font-variant-numeric:tabular-nums}
+.bl .cwrap{position:relative}
+.bl .count{position:absolute;right:10px;bottom:7px;background:transparent;pointer-events:none}
+.bl textarea{padding-bottom:24px}
+.err{display:none;margin-top:8px;background:var(--pink);color:#8f1f52;border-radius:10px;padding:11px 14px;font-size:14px}
+.err.on{display:block}
+.btn{display:block;width:100%;margin-top:20px;background:var(--grape);color:#fff;border:0;border-radius:12px;padding:15px 18px;font:600 16px 'Inter Tight',sans-serif;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--deep)}
+.btn:focus-visible,.link:focus-visible,.mini:focus-visible{outline:3px solid var(--lilac);outline-offset:2px}
+.link{background:none;border:0;padding:0;margin:12px auto 0;display:block;color:var(--deep);font:500 14px 'Inter Tight',sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+#results{margin-top:20px}
+.hero{background:var(--ink);color:#fff;border-radius:16px;padding:26px 26px 22px}
+.hero-top{display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.score{font-family:'Instrument Serif',Georgia,serif;font-size:88px;line-height:.85;letter-spacing:-1px}
+.score small{font-size:30px;color:#9aa1ad;letter-spacing:0}
+.verdict{flex:1;min-width:200px;padding-bottom:6px}
+.verdict b{display:block;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;font-size:28px;line-height:1.1;color:var(--rose)}
+.verdict p{margin:6px 0 0;color:#c9ced6;font-size:14px}
+.meter{height:6px;border-radius:6px;background:#2a323d;margin:20px 0 0;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--grape);border-radius:6px;transition:width .6s ease}
+.ruler{margin-top:22px;border-top:1px solid #2a323d;padding-top:16px}
+.ruler .rl{display:flex;justify-content:space-between;font-size:13px;color:#9aa1ad;margin-bottom:8px;gap:12px}
+.preview{font-size:15px;line-height:1.55;color:#fff;word-break:break-word}
+.preview mark{background:rgba(221,82,144,.28);color:#ffd3e2;text-decoration:line-through;text-decoration-color:rgba(255,171,185,.7);border-radius:3px;padding:0 1px}
+.preview .cut{display:inline-block;width:2px;height:1.05em;background:var(--rose);vertical-align:-2px;margin:0 2px;border-radius:2px}
+.aibox{margin-top:16px;background:var(--wash);border-radius:16px;padding:20px 22px}
+.aibox h3{margin:0;font-size:17px;font-weight:600}
+.aibox p.sub{margin:4px 0 0;color:var(--grey);font-size:14px}
+.aibtn{margin-top:14px;background:var(--grape);color:#fff;border:0;border-radius:10px;padding:12px 18px;font:600 15px 'Inter Tight',sans-serif;cursor:pointer;transition:background .15s}
+.aibtn:hover{background:var(--deep)}
+.aibtn[disabled]{opacity:.6;cursor:wait}
+.aiout{display:none;margin-top:16px;gap:10px}
+.aiout.on{display:grid}
+.aicard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.aicard .lab{margin-bottom:4px}
+.aicard .txt{font-size:15px;word-break:break-word}
+.aiact{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.mini{background:var(--paper);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 11px;font:500 13px 'Inter Tight',sans-serif;cursor:pointer}
+.mini:hover{border-color:var(--grape);color:var(--deep)}
+.mini.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mini.solid:hover{background:var(--deep);border-color:var(--deep);color:#fff}
+.aierr{display:none;margin-top:12px;color:#8f1f52;font-size:14px}
+.aierr.on{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.card.wide{grid-column:1/-1}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ch h4{margin:0;font-size:15px;font-weight:600}
+.pill{font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.pill.pass{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.fail{background:var(--pink);color:#a3245f}
+.pill.skip{background:var(--bg);color:var(--grey)}
+.card ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.card li{display:grid;grid-template-columns:14px 1fr;gap:8px;font-size:14px;line-height:1.45}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:7px}
+.dot.pass{background:var(--ok)}.dot.warn{background:#e0a030}.dot.fail{background:var(--pinkdeep)}
+.card li em{font-style:normal;color:var(--grey);display:block;font-size:13px}
+.notes{margin-top:16px;font-size:12.5px;color:var(--grey);line-height:1.55}
+.notes p{margin:0 0 6px}
+.notes a{color:var(--deep)}
+@media (max-width:640px){
+  .panel{padding:18px}
+  .row,.grid{grid-template-columns:1fr}
+  .score{font-size:72px}
+  .hero{padding:22px 20px 20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<form id="f" class="panel" novalidate>
+  <div class="row">
+    <div class="field">
+      <div class="lab"><label for="brand">Brand name <span class="opt">optional</span></label></div>
+      <input type="text" id="brand" maxlength="80" autocomplete="off" placeholder="e.g. Northfield">
+    </div>
+    <label class="toggle" for="media">
+      <input type="checkbox" id="media">
+      <span>Book, music or video listing<small>Media keeps the 200-character title limit</small></span>
+    </label>
+  </div>
+
+  <div class="field">
+    <div class="lab"><label for="title">Product title</label><span class="count" id="c-title">0 / 75</span></div>
+    <textarea id="title" rows="2" maxlength="400" placeholder="Paste your current Amazon title"></textarea>
+    <div class="err" id="err" role="alert"></div>
+  </div>
+
+  <div class="field">
+    <div class="lab"><label for="hl">Item Highlights <span class="opt">optional</span></label><span class="count" id="c-hl">0 / 125</span></div>
+    <textarea id="hl" rows="2" maxlength="400" placeholder="Materials, sizes, compatibility or use cases that did not fit in the title"></textarea>
+  </div>
+
+  <div class="field">
+    <div class="lab"><span class="lt">Bullet points</span><span class="opt">up to 5</span></div>
+    <div class="bullets" id="bullets"></div>
+  </div>
+
+  <div class="field">
+    <div class="lab"><label for="desc">Product description <span class="opt">optional</span></label><span class="count" id="c-desc">0 / 2,000</span></div>
+    <textarea id="desc" rows="3" maxlength="6000" placeholder="Paste your description"></textarea>
+  </div>
+
+  <div class="field">
+    <div class="lab"><label for="kw">Backend search terms <span class="opt">optional</span></label><span class="count" id="c-kw">0 / 249 bytes</span></div>
+    <textarea id="kw" rows="2" maxlength="1200" placeholder="Words separated by spaces, no commas needed"></textarea>
+  </div>
+
+  <button type="submit" class="btn" id="go">Check my listing</button>
+  <button type="button" class="link" id="sample">Load an example listing</button>
+</form>
+
+<section id="results" hidden aria-live="polite">
+  <div class="hero">
+    <div class="hero-top">
+      <div class="score" id="score">0<small> / 100</small></div>
+      <div class="verdict"><b id="verdict"></b><p id="summary"></p></div>
+    </div>
+    <div class="meter"><i id="meter"></i></div>
+    <div class="ruler">
+      <div class="rl"><span id="ruler-label">How your title displays</span><span id="ruler-count"></span></div>
+      <div class="preview" id="preview"></div>
+    </div>
+  </div>
+
+  <div class="aibox" id="aibox">
+    <h3 id="ai-h">Fix my title</h3>
+    <p class="sub" id="ai-sub">Get a compliant title within the limit, with the details that no longer fit moved into Item Highlights.</p>
+    <button type="button" class="aibtn" id="aibtn">Rewrite my title</button>
+    <div class="aierr" id="aierr" role="alert"></div>
+    <div class="aiout" id="aiout">
+      <div class="aicard">
+        <div class="lab"><span class="lt">Suggested title</span><span class="count" id="ai-tc"></span></div>
+        <div class="txt" id="ai-title"></div>
+        <div class="aiact"><button type="button" class="mini" data-copy="ai-title">Copy</button></div>
+      </div>
+      <div class="aicard">
+        <div class="lab"><span class="lt">Suggested Item Highlights</span><span class="count" id="ai-hc"></span></div>
+        <div class="txt" id="ai-hl"></div>
+        <div class="aiact"><button type="button" class="mini" data-copy="ai-hl">Copy</button></div>
+      </div>
+      <div class="aiact"><button type="button" class="mini solid" id="ai-use">Use these and recheck</button><button type="button" class="mini" id="ai-again">Try another version</button></div>
+    </div>
+  </div>
+
+  <div class="grid" id="cards"></div>
+
+  <div class="notes">
+    <p>This score is our own rubric built on Amazon's published listing rules. It is not a score from Amazon and does not predict rank or sales. Limits can differ by category and marketplace, so confirm the final numbers on your listing form in Seller Central. Suggested rewrites can contain mistakes; review them before you publish.</p>
+    <p>Sources, checked October 20, 2026: Amazon Seller Central, "Updates to improve your product titles begin on July 27" (75-character titles and 125-character Item Highlights for all non-media categories from July 27, 2026); Amazon Seller Central, Product title requirements (banned characters ! $ ? _ { } ^ &not; &brvbar; and limits on repeated words); Amazon Seller Central, bullet point requirements effective August 15, 2024 (special characters, emojis, prohibited phrases and refund guarantees); Amazon Seller Central help for backend search terms (249-byte limit in the US store) and the 2,000-character product description limit.</p>
+  </div>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+var KEY = "siListOptHeight";
+var LIM = { title: 75, titleMedia: 200, hl: 125, bullet: 255, bulletMax: 500, desc: 2000, kw: 249 };
+var $ = function(id){ return document.getElementById(id); };
+
+/* ---------- rule data (all non-ASCII chars as escapes) ---------- */
+var TITLE_BANNED = ["!", "$", "?", "_", "{", "}", "^", "\u00ac", "\u00a6"];
+var BULLET_SPECIAL = ["\u2122", "\u00ae", "\u20ac", "\u2026", "\u2020", "\u2021", "\u00ba", "\u00a2", "\u00a3", "\u00a5", "\u00a9", "\u00b1", "~"];
+var EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{2705}\u{274C}]/u;
+var PROMO = [
+  [/\bbest[- ]?sell(er|ers|ing)\b/i, "best seller"],
+  [/\bbest\b/i, "best"],
+  [/\btop[- ]?rated\b/i, "top rated"],
+  [/\bfree shipping\b/i, "free shipping"],
+  [/\bhot item\b/i, "hot item"],
+  [/\bon sale\b|\bsale\b/i, "sale"],
+  [/#\s?1\b|\bno\.\s?1\b|\bnumber one\b/i, "#1"],
+  [/\bcheap(est)?\b/i, "cheap"],
+  [/\bdiscount(ed)?\b/i, "discount"],
+  [/\blimited time\b/i, "limited time"],
+  [/\bdeals?\b/i, "deal"],
+  [/\bguarantee(d)?\b/i, "guarantee"],
+  [/\bbuy now\b/i, "buy now"]
+];
+var BANNED_PHRASES = [
+  "eco-friendly", "eco friendly", "environmentally friendly", "ecologically friendly",
+  "anti-microbial", "antimicrobial", "anti-bacterial", "antibacterial",
+  "made from bamboo", "contains bamboo", "made from soy", "contains soy"
+];
+var GUARANTEE_RE = /\b(full refund|money[- ]back|refund|unconditional guarantee|if not satisfied|satisfaction guaranteed|send it back|risk[- ]free)\b/i;
+var URL_RE = /(https?:\/\/|www\.)\S+|\b[\w.-]+@[\w-]+\.[a-z]{2,}\b|\b[a-z0-9-]+\.(com|net|org|io|co|shop|store)\b/i;
+var ASIN_RE = /\bB0[A-Z0-9]{8}\b/;
+var STOP = {"a":1,"an":1,"and":1,"or":1,"for":1,"with":1,"the":1,"of":1,"in":1,"on":1,"to":1,"by":1,"at":1,"from":1,"as":1,"x":1,"&":1,"is":1,"it":1,"your":1,"you":1,"this":1};
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function clean(s){ return String(s || "").replace(/\s+/g, " ").trim(); }
+function chars(s){ return Array.from(s).length; }
+function bytes(s){ return new TextEncoder().encode(s).length; }
+function fmt(n){ return n.toLocaleString("en-US"); }
+function norm(w){
+  w = w.toLowerCase();
+  if (w.length > 4 && /ies$/.test(w)) return w.slice(0, -3) + "y";
+  if (w.length > 3 && /s$/.test(w) && !/ss$/.test(w)) return w.slice(0, -1);
+  return w;
+}
+function words(s){
+  return (s.toLowerCase().match(/[a-z0-9]+(?:['-][a-z0-9]+)*/g) || []);
+}
+function contentWords(s){
+  return words(s).filter(function(w){ return !STOP[w] && !/^\d+$/.test(w) && w.length > 1; });
+}
+function stripBrand(s, brand){
+  if (!brand) return s;
+  var i = s.toLowerCase().indexOf(brand.toLowerCase());
+  return i < 0 ? s : s.slice(0, i) + " " + s.slice(i + brand.length);
+}
+function foundIn(s, list){
+  var out = [];
+  list.forEach(function(c){ if (s.indexOf(c) > -1 && out.indexOf(c) < 0) out.push(c); });
+  return out;
+}
+function promoHits(s){
+  var out = [];
+  PROMO.forEach(function(p){ if (p[0].test(s) && out.indexOf(p[1]) < 0) out.push(p[1]); });
+  if (out.indexOf("best seller") > -1) out = out.filter(function(x){ return x !== "best"; });
+  return out;
+}
+function phraseHits(s){
+  var l = s.toLowerCase(), out = [];
+  BANNED_PHRASES.forEach(function(p){ if (l.indexOf(p) > -1) out.push(p); });
+  return out;
+}
+function quoteList(a){ return a.map(function(x){ return '"' + x + '"'; }).join(", "); }
+
+/* ---------- checks ---------- */
+// each item: {lv:'pass'|'warn'|'fail', t:text, d:detail, pts:deduction}
+function checkTitle(title, brand, media){
+  var r = [], lim = media ? LIM.titleMedia : LIM.title, n = chars(title);
+  if (n > lim) r.push({lv:"fail", pts:20, t:"Title is " + n + " characters. The limit is " + lim + ".", d: media ? "Media titles may not exceed 200 characters, including spaces." : "Since July 27, 2026 Amazon rewrites non-media titles over 75 characters with its own AI version. Trim it yourself so you control the wording."});
+  else r.push({lv:"pass", pts:0, t:"Length is within the " + lim + "-character limit (" + n + " used)."});
+  if (n < 20) r.push({lv:"warn", pts:4, t:"Title is very short.", d:"Lead with brand and product type so shoppers know what it is at a glance."});
+
+  var noBrand = stripBrand(title, brand);
+  var bad = foundIn(noBrand, TITLE_BANNED);
+  if (bad.length) r.push({lv:"fail", pts:10, t:"Uses characters Amazon does not allow in titles: " + bad.join(" "), d:"These are only allowed when they are part of your brand name." + (brand ? "" : " Add your brand above if a character belongs to it.")});
+  if (EMOJI_RE.test(title)) r.push({lv:"fail", pts:8, t:"Contains emojis or decorative symbols.", d:"Decorative special characters are not allowed in titles."});
+
+  var counts = {}, first = {};
+  contentWords(stripBrand(title, brand)).forEach(function(w){ var k = norm(w); counts[k] = (counts[k] || 0) + 1; if (!first[k]) first[k] = w; });
+  var reps = Object.keys(counts).filter(function(k){ return counts[k] > 2; }).map(function(k){ return first[k] + " (" + counts[k] + "x)"; });
+  if (reps.length) r.push({lv:"fail", pts:8, t:"Repeats words more than twice: " + reps.join(", "), d:"Amazon counts singular and plural forms as the same word. Articles, conjunctions and prepositions are exempt."});
+  else if (contentWords(title).length) r.push({lv:"pass", pts:0, t:"No word is repeated more than twice."});
+
+  var promo = promoHits(title);
+  if (promo.length) r.push({lv:"fail", pts:8, t:"Promotional wording: " + quoteList(promo), d:"Amazon's title rewrites target promotional language. Describe the product instead."});
+
+  var caps = (title.match(/\b[A-Z]{4,}\b/g) || []);
+  if (caps.length >= 2) r.push({lv:"warn", pts:4, t:"Several words are in all caps: " + caps.slice(0, 4).join(", "), d:"Use title case. Keep caps for real acronyms only."});
+
+  if (brand && title.toLowerCase().indexOf(brand.toLowerCase()) !== 0) r.push({lv:"warn", pts:3, t:"Title does not start with your brand name.", d:"Amazon's guidelines put the brand first, then the product type."});
+  if (ASIN_RE.test(title) || URL_RE.test(title)) r.push({lv:"fail", pts:8, t:"Contains an ASIN, link or email.", d:"Titles should only describe the product."});
+  return r;
+}
+
+function checkHighlights(hl, title, media){
+  var r = [];
+  if (media) { r.push({lv:"skip", pts:0, t:"Item Highlights is not part of the media title change."}); return r; }
+  if (!hl) { r.push({lv:"warn", pts:3, t:"Item Highlights is empty.", d:"You have 125 searchable characters under your title for materials, sizes, compatibility or use cases."}); return r; }
+  var n = chars(hl);
+  if (n > LIM.hl) r.push({lv:"fail", pts:10, t:"Item Highlights is " + n + " characters. The limit is 125.", d:"Cut it to your two or three strongest details."});
+  else r.push({lv:"pass", pts:0, t:"Length is within 125 characters (" + n + " used)."});
+  if (chars(title) > LIM.title) r.push({lv:"warn", pts:4, t:"Hidden until your title is 75 characters or less.", d:"Amazon only displays Item Highlights once the title fits the new limit."});
+  var tw = {}; contentWords(title).forEach(function(w){ tw[norm(w)] = 1; });
+  var hw = contentWords(hl), dup = hw.filter(function(w){ return tw[norm(w)]; });
+  if (hw.length >= 4 && dup.length / hw.length > 0.5) r.push({lv:"warn", pts:4, t:"Mostly repeats words already in your title.", d:"Use this space for details the title does not cover."});
+  var promo = promoHits(hl);
+  if (promo.length) r.push({lv:"warn", pts:3, t:"Promotional wording: " + quoteList(promo), d:"Amazon monitors Item Highlights for restricted content."});
+  if (EMOJI_RE.test(hl)) r.push({lv:"warn", pts:3, t:"Contains emojis or decorative symbols."});
+  return r;
+}
+
+function checkBullets(list){
+  var r = [], filled = list.filter(function(b){ return b; });
+  if (filled.length < 3) r.push({lv:"fail", pts:10, t:"Only " + filled.length + " bullet point" + (filled.length === 1 ? "" : "s") + " filled in.", d:"Amazon asks for at least three, and five gives shoppers the full picture."});
+  else r.push({lv:"pass", pts:0, t:filled.length + " bullet points filled in."});
+  var longMax = [], longRec = [], short = [], spec = [], emo = [], phr = [], guar = [], links = [], promo = [];
+  list.forEach(function(b, i){
+    if (!b) return;
+    var n = chars(b), k = i + 1;
+    if (n > LIM.bulletMax) longMax.push(k); else if (n > LIM.bullet) longRec.push(k);
+    if (n < 10) short.push(k);
+    foundIn(b, BULLET_SPECIAL).forEach(function(c){ if (spec.indexOf(c) < 0) spec.push(c); });
+    if (EMOJI_RE.test(b)) emo.push(k);
+    phraseHits(b).forEach(function(p){ if (phr.indexOf(p) < 0) phr.push(p); });
+    if (GUARANTEE_RE.test(b)) guar.push(k);
+    if (URL_RE.test(b) || ASIN_RE.test(b)) links.push(k);
+    promoHits(b).forEach(function(p){ if (p !== "guarantee" && promo.indexOf(p) < 0) promo.push(p); });
+  });
+  if (longMax.length) r.push({lv:"fail", pts:6, t:"Bullet " + longMax.join(", ") + " is over 500 characters.", d:"Most categories cap bullets at 500 or lower."});
+  if (longRec.length) r.push({lv:"warn", pts:2, t:"Bullet " + longRec.join(", ") + " is over 255 characters.", d:"Amazon recommends 10 to 255 characters, and some categories enforce 255."});
+  if (short.length) r.push({lv:"warn", pts:2, t:"Bullet " + short.join(", ") + " is under 10 characters."});
+  if (spec.length) r.push({lv:"fail", pts:6, t:"Uses special characters Amazon restricts in bullets: " + spec.join(" "), d:"Trademark, copyright and currency symbols, ellipses and similar marks are removed or rewritten."});
+  if (emo.length) r.push({lv:"fail", pts:6, t:"Emojis in bullet " + emo.join(", ") + ".", d:"Emojis such as check marks are not allowed in bullet points."});
+  if (phr.length) r.push({lv:"fail", pts:6, t:"Prohibited claims: " + quoteList(phr), d:"Amazon lists these environmental and material claims as prohibited in bullets."});
+  if (guar.length) r.push({lv:"fail", pts:6, t:"Refund or guarantee language in bullet " + guar.join(", ") + ".", d:"Refund-related guarantees have been restricted in bullets since August 15, 2024."});
+  if (links.length) r.push({lv:"fail", pts:6, t:"Link, email or ASIN in bullet " + links.join(", ") + "."});
+  if (promo.length) r.push({lv:"warn", pts:3, t:"Promotional wording: " + quoteList(promo)});
+  var seen = {}, dups = [];
+  filled.forEach(function(b, i){ var k = clean(b).toLowerCase(); if (seen[k]) dups.push(i + 1); seen[k] = 1; });
+  if (dups.length) r.push({lv:"warn", pts:3, t:"Some bullets repeat each other.", d:"Each bullet should cover something different."});
+  if (filled.length && !spec.length && !emo.length && !phr.length && !guar.length && !links.length) r.push({lv:"pass", pts:0, t:"No restricted characters, emojis or prohibited claims found."});
+  return r;
+}
+
+function checkDesc(d){
+  var r = [];
+  if (!d) { r.push({lv:"warn", pts:2, t:"Description is empty.", d:"If you have A+ Content it may replace this on the page, but a description still helps shoppers on some views."}); return r; }
+  var n = chars(d);
+  if (n > LIM.desc) r.push({lv:"fail", pts:8, t:"Description is " + fmt(n) + " characters. The limit is 2,000."});
+  else r.push({lv:"pass", pts:0, t:"Length is within 2,000 characters (" + fmt(n) + " used)."});
+  if (URL_RE.test(d) || ASIN_RE.test(d)) r.push({lv:"fail", pts:6, t:"Contains a link, email or ASIN.", d:"Contact details and outside links are not allowed in listing copy."});
+  var promo = promoHits(d);
+  if (promo.length) r.push({lv:"warn", pts:3, t:"Promotional wording: " + quoteList(promo)});
+  if (EMOJI_RE.test(d)) r.push({lv:"warn", pts:2, t:"Contains emojis or decorative symbols."});
+  return r;
+}
+
+function checkKeywords(kw, title){
+  var r = [];
+  if (!kw) { r.push({lv:"warn", pts:3, t:"Backend search terms are empty.", d:"Use them for synonyms, alternate spellings and terms that do not fit on the page."}); return r; }
+  var b = bytes(kw);
+  if (b > LIM.kw) r.push({lv:"fail", pts:15, t:"Search terms are " + b + " bytes. The limit is 249.", d:"Go over by even one byte and Amazon may ignore the entire field. Accented letters and symbols count as more than one byte."});
+  else r.push({lv:"pass", pts:0, t:"Within the 249-byte limit (" + b + " used)."});
+  if (/[,;]/.test(kw)) r.push({lv:"warn", pts:2, t:"Uses commas or semicolons.", d:"Separate terms with spaces. Punctuation spends bytes without adding search terms."});
+  var tw = {}; contentWords(title).forEach(function(w){ tw[norm(w)] = 1; });
+  var inTitle = [], seen = {}, rep = [];
+  contentWords(kw).forEach(function(w){
+    var k = norm(w);
+    if (tw[k] && inTitle.indexOf(w) < 0) inTitle.push(w);
+    if (seen[k] && rep.indexOf(w) < 0) rep.push(w);
+    seen[k] = 1;
+  });
+  if (inTitle.length) r.push({lv:"warn", pts:3, t:"Already in your title: " + inTitle.slice(0, 8).join(", ") + (inTitle.length > 8 ? " and more" : ""), d:"Words in the title are already indexed. Swap them for new terms."});
+  if (rep.length) r.push({lv:"warn", pts:2, t:"Repeated terms: " + rep.slice(0, 8).join(", "), d:"Each word only needs to appear once."});
+  if (ASIN_RE.test(kw) || URL_RE.test(kw)) r.push({lv:"fail", pts:6, t:"Contains an ASIN, link or email."});
+  var promo = promoHits(kw);
+  if (promo.length) r.push({lv:"warn", pts:2, t:"Subjective or promotional terms: " + quoteList(promo), d:"Shoppers rarely search these, so they waste bytes."});
+  return r;
+}
+
+function evaluate(input){
+  var sections = [
+    {key:"title", name:"Title", items: checkTitle(input.title, input.brand, input.media), wide:true},
+    {key:"hl", name:"Item Highlights", items: checkHighlights(input.hl, input.title, input.media)},
+    {key:"kw", name:"Backend search terms", items: checkKeywords(input.kw, input.title)},
+    {key:"bullets", name:"Bullet points", items: checkBullets(input.bullets), wide:true},
+    {key:"desc", name:"Description", items: checkDesc(input.desc), wide:true}
+  ];
+  var pts = 0, fails = 0, warns = 0;
+  sections.forEach(function(s){
+    s.items.forEach(function(it){ pts += it.pts; if (it.lv === "fail") fails++; if (it.lv === "warn") warns++; });
+    var lv = "pass";
+    s.items.forEach(function(it){ if (it.lv === "fail") lv = "fail"; else if (it.lv === "warn" && lv !== "fail") lv = "warn"; else if (it.lv === "skip" && lv === "pass" && s.items.length === 1) lv = "skip"; });
+    s.level = lv;
+  });
+  return { score: Math.max(0, 100 - pts), fails: fails, warns: warns, sections: sections };
+}
+window.__siEvaluate = evaluate; // exposed for automated tests
+
+/* ---------- UI ---------- */
+var bulletBox = $("bullets");
+for (var i = 1; i <= 5; i++) {
+  var d = document.createElement("div");
+  d.className = "bl";
+  d.innerHTML = '<span class="n">' + i + '</span><div class="cwrap"><textarea id="b' + i + '" rows="2" maxlength="1500" aria-label="Bullet point ' + i + '"' + (i === 1 ? ' placeholder="Start with a short label, then the detail"' : '') + '></textarea><span class="count" id="c-b' + i + '">0 / 255</span></div>';
+  bulletBox.appendChild(d);
+}
+
+function readInput(){
+  return {
+    brand: clean($("brand").value),
+    media: $("media").checked,
+    title: clean($("title").value),
+    hl: clean($("hl").value),
+    bullets: [1,2,3,4,5].map(function(i){ return clean($("b" + i).value); }),
+    desc: String($("desc").value || "").trim(),
+    kw: clean($("kw").value)
+  };
+}
+
+function setCount(id, n, lim, unit){
+  var el = $(id);
+  el.textContent = fmt(n) + " / " + fmt(lim) + (unit ? " " + unit : "");
+  el.classList.toggle("over", n > lim);
+}
+function autosize(){
+  document.querySelectorAll("#f textarea").forEach(function(t){ t.style.height = "auto"; t.style.height = (t.scrollHeight + 2) + "px"; });
+}
+function updateCounts(){
+  autosize();
+  var tl = $("media").checked ? LIM.titleMedia : LIM.title;
+  setCount("c-title", chars(clean($("title").value)), tl);
+  setCount("c-hl", chars(clean($("hl").value)), LIM.hl);
+  setCount("c-desc", chars(String($("desc").value).trim()), LIM.desc);
+  setCount("c-kw", bytes(clean($("kw").value)), LIM.kw, "bytes");
+  for (var i = 1; i <= 5; i++) setCount("c-b" + i, chars(clean($("b" + i).value)), LIM.bullet);
+}
+
+var VERDICTS = [[90, "Ready to publish"], [75, "A few fixes"], [50, "Needs work"], [0, "At risk"]];
+function verdict(s){ for (var i = 0; i < VERDICTS.length; i++) if (s >= VERDICTS[i][0]) return VERDICTS[i][1]; return ""; }
+
+function renderPreview(title, lim){
+  var arr = Array.from(title);
+  if (arr.length <= lim) return esc(title);
+  return esc(arr.slice(0, lim).join("")) + '<span class="cut" aria-hidden="true"></span><mark title="Over the limit">' + esc(arr.slice(lim).join("")) + "</mark>";
+}
+
+var lastInput = null;
+function render(res, input){
+  var lim = input.media ? LIM.titleMedia : LIM.title, n = chars(input.title);
+  $("score").innerHTML = res.score + "<small> / 100</small>";
+  $("verdict").textContent = verdict(res.score);
+  var parts = [];
+  parts.push(res.fails ? res.fails + " issue" + (res.fails === 1 ? "" : "s") + " to fix" : "No rule breaks found");
+  if (res.warns) parts.push(res.warns + " suggestion" + (res.warns === 1 ? "" : "s"));
+  $("summary").textContent = parts.join(", ") + ".";
+  $("meter").style.width = "0";
+  requestAnimationFrame(function(){ $("meter").style.width = res.score + "%"; });
+  $("ruler-count").textContent = n + " / " + lim + " characters";
+  $("ruler-label").textContent = n > lim ? "Everything after the marker is over the limit" : "Your title fits the limit";
+  $("preview").innerHTML = renderPreview(input.title, lim);
+
+  $("ai-sub").textContent = n > lim
+    ? "Get a compliant title within " + lim + " characters, with the details that no longer fit moved into Item Highlights."
+    : "Your title fits. Get an alternative version plus matching Item Highlights if you want a second option.";
+
+  var LBL = {pass:"Pass", warn:"Check", fail:"Fix", skip:"Not needed"};
+  $("cards").innerHTML = res.sections.map(function(s){
+    var items = s.items.map(function(it){
+      var lv = it.lv === "skip" ? "pass" : it.lv;
+      return '<li><span class="dot ' + lv + '"></span><span>' + esc(it.t) + (it.d ? "<em>" + esc(it.d) + "</em>" : "") + "</span></li>";
+    }).join("");
+    return '<div class="card' + (s.wide ? " wide" : "") + '"><div class="ch"><h4>' + esc(s.name) + '</h4><span class="pill ' + s.level + '">' + LBL[s.level] + "</span></div><ul>" + items + "</ul></div>";
+  }).join("");
+  $("results").hidden = false;
+}
+
+function showErr(msg){ var e = $("err"); e.textContent = msg; e.classList.toggle("on", !!msg); }
+
+function run(scroll){
+  var input = readInput();
+  if (!input.title) { showErr("Paste your product title to check your listing. The other fields are optional."); $("title").focus(); return; }
+  if (chars(input.title) < 3) { showErr("That title looks too short to check. Paste your full Amazon title."); $("title").focus(); return; }
+  showErr("");
+  lastInput = input;
+  render(evaluate(input), input);
+  if (scroll) $("results").scrollIntoView({behavior: "smooth", block: "start"});
+  postHeight();
+}
+
+$("f").addEventListener("submit", function(e){ e.preventDefault(); run(true); });
+$("f").addEventListener("input", function(){ updateCounts(); if (!$("err").classList.contains("on")) return; if (clean($("title").value)) showErr(""); });
+$("media").addEventListener("change", function(){ updateCounts(); if (!$("results").hidden) run(false); });
+document.querySelectorAll("#f input[type=text], #f textarea").forEach(function(el){
+  el.addEventListener("keydown", function(e){
+    if (e.key !== "Enter") return;
+    if (el.tagName === "INPUT" || el.id === "title" || el.id === "hl" || el.id === "kw" || e.metaKey || e.ctrlKey) { e.preventDefault(); run(true); }
+  });
+});
+
+$("sample").addEventListener("click", function(){
+  $("brand").value = "Northfield";
+  $("media").checked = false;
+  $("title").value = "Northfield Stainless Steel Water Bottle 32 oz Insulated Water Bottle with Straw Lid, BEST Leak Proof Water Bottle for Gym, Travel & Hiking - Keeps Drinks Cold 24 Hours!";
+  $("hl").value = "";
+  var b = [
+    "DOUBLE-WALL INSULATION: Keeps drinks cold for 24 hours and hot for 12 so your water stays the temperature you want all day",
+    "LEAK-PROOF STRAW LID: A locking straw lid seals tight in a gym bag or backpack \u2705",
+    "ECO-FRIENDLY & BPA FREE: Made from food-grade 18/8 stainless steel with no metallic taste",
+    "FITS CUP HOLDERS: The slim 32 oz body fits most car cup holders and bike cages",
+    "100% MONEY-BACK GUARANTEE: Not happy? Send it back for a full refund, no questions asked"
+  ];
+  for (var i = 1; i <= 5; i++) $("b" + i).value = b[i - 1];
+  $("desc").value = "Stay hydrated wherever the day takes you. The Northfield bottle keeps ice frozen through long workouts, road trips and trail days, and the powder-coated finish resists sweating and scratches.";
+  $("kw").value = "water bottle, insulated, gym bottle, flask, hydro, thermos, sports bottle, kids water bottle, metal canteen, hiking bottle, cold drinks";
+  updateCounts();
+  run(true);
+});
+
+/* ---------- AI rewrite ---------- */
+var aiBusy = false;
+function aiErr(msg){ var e = $("aierr"); e.textContent = msg; e.classList.toggle("on", !!msg); postHeight(); }
+function rewrite(){
+  if (aiBusy) return;
+  var input = lastInput || readInput();
+  if (!input.title) { aiErr("Paste your title and check your listing first."); return; }
+  aiBusy = true; aiErr("");
+  var btn = $("aibtn"); btn.disabled = true; btn.textContent = "Rewriting...";
+  fetch("/.netlify/functions/listing-rewrite", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ title: input.title, brand: input.brand, highlights: input.hl, bullets: input.bullets.filter(Boolean).slice(0, 3), media: input.media })
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if (!res.ok || !res.j || !res.j.title) { try { console.warn("listing-rewrite", res.j); } catch (e) {} }
+    if (!res.ok || !res.j || !res.j.title) throw new Error((res.j && res.j.error) || "The rewrite did not come back.");
+    var lim = input.media ? LIM.titleMedia : LIM.title;
+    var t = clean(res.j.title), h = clean(res.j.highlights || "");
+    $("ai-title").textContent = t;
+    $("ai-hl").textContent = h || "(none needed)";
+    setCount("ai-tc", chars(t), lim);
+    setCount("ai-hc", chars(h), LIM.hl);
+    $("aiout").classList.add("on");
+    $("ai-again").textContent = "Try another version";
+  }).catch(function(e){
+    aiErr("We could not rewrite your title right now. " + (e && e.message ? e.message : "") + " Try again in a moment.");
+  }).then(function(){
+    aiBusy = false; btn.disabled = false; btn.textContent = "Rewrite my title"; postHeight();
+  });
+}
+$("aibtn").addEventListener("click", rewrite);
+$("ai-again").addEventListener("click", rewrite);
+$("ai-use").addEventListener("click", function(){
+  $("title").value = $("ai-title").textContent;
+  var h = $("ai-hl").textContent;
+  $("hl").value = h === "(none needed)" ? "" : h;
+  updateCounts();
+  run(true);
+});
+
+document.addEventListener("click", function(e){
+  var b = e.target.closest("[data-copy]");
+  if (!b) return;
+  var txt = $(b.getAttribute("data-copy")).textContent;
+  var done = function(){ var o = b.textContent; b.textContent = "Copied"; setTimeout(function(){ b.textContent = o; }, 1400); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopy(txt); done(); });
+  else { fallbackCopy(txt); done(); }
+});
+function fallbackCopy(t){
+  var ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) {} document.body.removeChild(ta);
+}
+
+/* ---------- auto-resize for the Webflow iframe ---------- */
+var lastH = 0;
+function postHeight(){
+  var h = Math.ceil(document.documentElement.getBoundingClientRect().height);
+  if (h === lastH) return;
+  lastH = h;
+  try { var m = {}; m[KEY] = h; window.parent.postMessage(m, "*"); } catch (e) {}
+}
+if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+window.addEventListener("load", function(){ autosize(); postHeight(); });
+window.addEventListener("resize", autosize);
+updateCounts();
+postHeight();
+})();
+</script>
+</body>
+</html>
